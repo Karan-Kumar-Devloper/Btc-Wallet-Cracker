@@ -41,7 +41,7 @@ pip install --upgrade pip
 
 # Install required Python modules
 echo -e "\033[34mInstalling required Python modules..."
-pip install colorama mnemonic bip32utils ecdsa python-telegram-bot python-dotenv requests faker
+pip install colorama mnemonic bip32utils ecdsa python-telegram-bot python-dotenv requests faker httpx
 
 # Print success message
 python - <<EOF
