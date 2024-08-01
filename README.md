@@ -81,4 +81,3 @@ For any questions or issues, please contact the developer or refer to the reposi
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-```
