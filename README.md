@@ -34,7 +34,6 @@ Create a `.env` file in the project directory to store configuration settings. T
 Here’s an example `.env` file:
 
 ```
-# .env
 TELEGRAM_API_TOKEN=your_telegram_api_token
 TELEGRAM_CHAT_ID=your_telegram_chat_id
 ```
